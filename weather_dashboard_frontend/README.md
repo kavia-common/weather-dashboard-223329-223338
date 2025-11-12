@@ -9,7 +9,7 @@ A responsive, modern Weather Dashboard built with React. It features an accessib
 - Loading and error states with aria-live for accessibility
 - Input sanitization and centralized error handling
 - Mock data fallback when no backend is configured
-- Preparation for backend integration using REACT_APP_API_BASE
+- Backend integration via REACT_APP_API_BASE with graceful fallback and helpful diagnostics
 
 ## Getting Started
 
@@ -28,6 +28,7 @@ A responsive, modern Weather Dashboard built with React. It features an accessib
 These variables are read from the environment if present:
 
 - REACT_APP_API_BASE: Base URL for backend API (e.g., https://api.example.com). If unset, the app uses mocked data and remains fully functional.
+- REACT_APP_ALLOW_MOCK_ON_ERROR: When true (default), if the configured API is unreachable or CORS-blocked, the app will gracefully fall back to mock data and show a diagnostic note. Set to false to disable mock fallback on errors.
 - REACT_APP_NODE_ENV: Node environment label for footer display.
 - REACT_APP_PORT: If used by tooling (Create React App defaults to 3000).
 - REACT_APP_FEATURE_FLAGS: String/JSON flags for future use.
@@ -41,7 +42,20 @@ When REACT_APP_API_BASE is not set, weatherClient.js returns mocked data:
 - Current weather sample: San Francisco, temp 18°C, feelsLike 17°C, humidity 72%, wind 14 km/h, visibility 10 km
 - Forecast: 5 items with day label, min/max, and icon
 
-This enables full UI functionality without any backend.
+If REACT_APP_API_BASE is set but the API is unreachable or CORS fails, the app will:
+- By default (REACT_APP_ALLOW_MOCK_ON_ERROR=true), fall back to mock data and display a diagnostic banner with hints.
+- If REACT_APP_ALLOW_MOCK_ON_ERROR=false, show a helpful error instructing to check backend reachability and CORS.
+
+## CORS and Backend Configuration
+
+Ensure your backend allows the frontend origin. Typical CORS headers required:
+- Access-Control-Allow-Origin: https://your-frontend-host:3000
+- Access-Control-Allow-Methods: GET, OPTIONS
+- Access-Control-Allow-Headers: Content-Type
+
+Endpoints expected:
+- GET {REACT_APP_API_BASE}/weather/current?q=City
+- GET {REACT_APP_API_BASE}/weather/forecast?q=City
 
 ## Project Structure
 
@@ -55,6 +69,7 @@ src/
   - ForecastItem.jsx
   - LoadingState.jsx
   - ErrorState.jsx
+  - DebugBanner.jsx
 - hooks/
   - useWeather.js
 - services/
@@ -75,16 +90,6 @@ src/
 ## Theming
 
 Theme tokens are defined in src/styles/theme.js and applied via inline styles and root CSS variables. The design follows a modern aesthetic with subtle shadows, rounded corners (12px), and smooth transitions.
-
-## Backend Integration (Future)
-
-weatherClient.js reads REACT_APP_API_BASE and exposes:
-- getCurrentWeather(query)
-- getForecast(query)
-
-If you provision a backend:
-- Implement endpoints /weather/current?q=City and /weather/forecast?q=City
-- Ensure CORS is configured for the frontend origin
 
 ## Notes
 

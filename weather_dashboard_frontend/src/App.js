@@ -7,13 +7,15 @@ import CurrentWeatherCard from './components/CurrentWeatherCard';
 import ForecastList from './components/ForecastList';
 import LoadingState from './components/LoadingState';
 import ErrorState from './components/ErrorState';
+import DebugBanner from './components/DebugBanner';
 import { useWeather } from './hooks/useWeather';
+import { getClientMeta } from './services/weatherClient';
 
 // PUBLIC_INTERFACE
 function App() {
   /** Weather Dashboard single-page app. */
   const [mode, setMode] = useState('light');
-  const { query, setQuery, loading, error, current, forecast, fetchWeather } = useWeather('');
+  const { query, setQuery, loading, error, current, forecast, fetchWeather, diagnostic } = useWeather('');
 
   useEffect(() => {
     applyThemeRootVars();
@@ -28,6 +30,8 @@ function App() {
   const handleSearch = (q) => {
     fetchWeather(q);
   };
+
+  const meta = getClientMeta();
 
   return (
     <div style={{
@@ -52,6 +56,12 @@ function App() {
             value={query}
             onChange={setQuery}
             onSearch={handleSearch}
+          />
+          <DebugBanner
+            visible={true}
+            apiBase={meta.apiBase}
+            mockEnabled={!meta.hasBackend || meta.allowMockOnError}
+            diagnostic={diagnostic}
           />
         </section>
 

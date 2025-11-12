@@ -1,5 +1,5 @@
 import { useCallback, useMemo, useRef, useState } from 'react';
-import { getCurrentWeather, getForecast } from '../services/weatherClient';
+import { getCurrentWeather, getForecast, getClientMeta } from '../services/weatherClient';
 import { sanitizeQuery } from '../utils/format';
 
 function isValidQuery(q) {
@@ -14,6 +14,7 @@ export function useWeather(initialQuery = '') {
   const [error, setError] = useState('');
   const [current, setCurrent] = useState(null);
   const [forecast, setForecast] = useState([]);
+  const [diagnostic, setDiagnostic] = useState(null);
   const abortRef = useRef({ aborted: false });
 
   const setSafeQuery = useCallback((val) => {
@@ -28,6 +29,7 @@ export function useWeather(initialQuery = '') {
     }
     setLoading(true);
     setError('');
+    setDiagnostic(null);
     abortRef.current.aborted = false;
     try {
       const [c, f] = await Promise.all([
@@ -38,8 +40,17 @@ export function useWeather(initialQuery = '') {
       setCurrent(c);
       setForecast(Array.isArray(f) ? f : []);
     } catch (e) {
-      // Centralized error message. Hide sensitive details.
-      setError(e?.message || 'Unable to load weather. Please try again.');
+      // User-friendly error with diagnostics when available (no sensitive details)
+      const meta = getClientMeta();
+      const details = e?.details || {};
+      const msg = e?.message || 'Unable to load weather. Please try again.';
+      setError(msg);
+      setDiagnostic({
+        apiBase: meta.apiBase || null,
+        code: details.code || null,
+        status: details.status || null,
+        hint: details.hint || null,
+      });
       setCurrent(null);
       setForecast([]);
     } finally {
@@ -51,11 +62,12 @@ export function useWeather(initialQuery = '') {
     setCurrent(null);
     setForecast([]);
     setError('');
+    setDiagnostic(null);
   }, []);
 
   const state = useMemo(() => ({
-    query, setQuery: setSafeQuery, loading, error, current, forecast, fetchWeather, reset,
-  }), [query, setSafeQuery, loading, error, current, forecast, fetchWeather, reset]);
+    query, setQuery: setSafeQuery, loading, error, current, forecast, fetchWeather, reset, diagnostic,
+  }), [query, setSafeQuery, loading, error, current, forecast, fetchWeather, reset, diagnostic]);
 
   return state;
 }
