@@ -1,82 +1,92 @@
-# Lightweight React Template for KAVIA
+# Weather Dashboard Frontend (React)
 
-This project provides a minimal React template with a clean, modern UI and minimal dependencies.
+A responsive, modern Weather Dashboard built with React. It features an accessible UI, Ocean Professional theme, search with debounce, current weather card, and 5-day forecast panel.
 
 ## Features
 
-- **Lightweight**: No heavy UI frameworks - uses only vanilla CSS and React
-- **Modern UI**: Clean, responsive design with KAVIA brand styling
-- **Fast**: Minimal dependencies for quick loading times
-- **Simple**: Easy to understand and modify
+- Ocean Professional theme (primary #2563EB, amber accents, error #EF4444)
+- Responsive layout: header, search bar, current weather card, forecast panel
+- Loading and error states with aria-live for accessibility
+- Input sanitization and centralized error handling
+- Mock data fallback when no backend is configured
+- Preparation for backend integration using REACT_APP_API_BASE
 
 ## Getting Started
 
-In the project directory, you can run:
+1) Install dependencies
+   npm install
 
-### `npm start`
+2) Run development server
+   npm start
+   Open http://localhost:3000
 
-Runs the app in development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+3) Build for production
+   npm run build
 
-### `npm test`
+## Environment Variables
 
-Launches the test runner in interactive watch mode.
+These variables are read from the environment if present:
 
-### `npm run build`
+- REACT_APP_API_BASE: Base URL for backend API (e.g., https://api.example.com). If unset, the app uses mocked data and remains fully functional.
+- REACT_APP_NODE_ENV: Node environment label for footer display.
+- REACT_APP_PORT: If used by tooling (Create React App defaults to 3000).
+- REACT_APP_FEATURE_FLAGS: String/JSON flags for future use.
+- REACT_APP_EXPERIMENTS_ENABLED: Enable experimental toggles in future.
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+Note: Do not commit secrets to the repository. Provide variables through your environment or .env (not included here). You may create a local .env with the above keys if needed.
 
-## Customization
+## Mock Fallback
 
-### Colors
+When REACT_APP_API_BASE is not set, weatherClient.js returns mocked data:
+- Current weather sample: San Francisco, temp 18°C, feelsLike 17°C, humidity 72%, wind 14 km/h, visibility 10 km
+- Forecast: 5 items with day label, min/max, and icon
 
-The main brand colors are defined as CSS variables in `src/App.css`:
+This enables full UI functionality without any backend.
 
-```css
-:root {
-  --kavia-orange: #E87A41;
-  --kavia-dark: #1A1A1A;
-  --text-color: #ffffff;
-  --text-secondary: rgba(255, 255, 255, 0.7);
-  --border-color: rgba(255, 255, 255, 0.1);
-}
-```
+## Project Structure
 
-### Components
+src/
+- App.js (dashboard layout and integration)
+- components/
+  - Header.jsx
+  - SearchBar.jsx
+  - CurrentWeatherCard.jsx
+  - ForecastList.jsx
+  - ForecastItem.jsx
+  - LoadingState.jsx
+  - ErrorState.jsx
+- hooks/
+  - useWeather.js
+- services/
+  - weatherClient.js
+- styles/
+  - theme.js
+- utils/
+  - format.js
+- index.js / index.css / App.css
 
-This template uses pure HTML/CSS components instead of a UI framework. You can find component styles in `src/App.css`. 
+## Accessibility
 
-Common components include:
-- Buttons (`.btn`, `.btn-large`)
-- Container (`.container`)
-- Navigation (`.navbar`)
-- Typography (`.title`, `.subtitle`, `.description`)
+- Search form and inputs include accessible labels
+- Loading and error states use aria-live regions
+- Keyboard focus and hover states are visible
+- Semantic regions: role="banner", role="main", role="contentinfo"
 
-## Learn More
+## Theming
 
-To learn React, check out the [React documentation](https://reactjs.org/).
+Theme tokens are defined in src/styles/theme.js and applied via inline styles and root CSS variables. The design follows a modern aesthetic with subtle shadows, rounded corners (12px), and smooth transitions.
 
-### Code Splitting
+## Backend Integration (Future)
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
+weatherClient.js reads REACT_APP_API_BASE and exposes:
+- getCurrentWeather(query)
+- getForecast(query)
 
-### Analyzing the Bundle Size
+If you provision a backend:
+- Implement endpoints /weather/current?q=City and /weather/forecast?q=City
+- Ensure CORS is configured for the frontend origin
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
+## Notes
 
-### Making a Progressive Web App
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
-
-### Advanced Configuration
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
-
-### Deployment
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
-
-### `npm run build` fails to minify
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+- No secrets are hardcoded; configuration is handled via environment variables.
+- Tests are not required for this task, but code is structured to be unit-test friendly.
